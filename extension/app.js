@@ -1554,7 +1554,8 @@ async function renderBookmarks() {
       const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
       const title = bm.title || domain || bm.url;
       const safeUrl = bm.url.replace(/"/g, '&quot;');
-      return `<a class="bookmark-chip" href="${safeUrl}" title="${title}" target="_top">
+      return `<a class="bookmark-chip" href="${safeUrl}" title="${title}" target="_top"
+          data-bm-id="${bm.id}" data-bm-title="${title.replace(/"/g, '&quot;')}" data-bm-url="${safeUrl}">
         ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.style.display='none'">` : ''}
         <span>${title}</span>
       </a>`;
@@ -1564,6 +1565,87 @@ async function renderBookmarks() {
     strip.style.display = 'none';
   }
 }
+
+
+/* ----------------------------------------------------------------
+   BOOKMARK CONTEXT MENU + EDIT MODAL
+   ---------------------------------------------------------------- */
+
+let bmCtxTarget = null;
+const bmCtxMenu = document.getElementById('bmCtxMenu');
+
+document.addEventListener('contextmenu', (e) => {
+  const chip = e.target.closest('.bookmark-chip');
+  if (!chip) return;
+  e.preventDefault();
+  bmCtxTarget = chip;
+  bmCtxMenu.style.display = 'block';
+  const x = Math.min(e.clientX, window.innerWidth - 160);
+  const y = Math.min(e.clientY, window.innerHeight - 90);
+  bmCtxMenu.style.left = x + 'px';
+  bmCtxMenu.style.top  = y + 'px';
+});
+
+document.addEventListener('click', (e) => {
+  if (!bmCtxMenu.contains(e.target)) {
+    bmCtxMenu.style.display = 'none';
+  }
+});
+
+document.getElementById('bmCtxEdit').addEventListener('click', () => {
+  if (!bmCtxTarget) return;
+  bmCtxMenu.style.display = 'none';
+  const title = bmCtxTarget.dataset.bmTitle || '';
+  const url   = bmCtxTarget.dataset.bmUrl   || '';
+  document.getElementById('bmModalInput').value = title;
+  document.getElementById('bmModalUrl').textContent = url;
+  document.getElementById('bmModalOverlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('bmModalInput').select(), 50);
+});
+
+document.getElementById('bmCtxDelete').addEventListener('click', async () => {
+  if (!bmCtxTarget) return;
+  bmCtxMenu.style.display = 'none';
+  const id = bmCtxTarget.dataset.bmId;
+  if (!id) return;
+  try {
+    await chrome.bookmarks.remove(id);
+    bmCtxTarget.style.transition = 'opacity 0.2s, transform 0.2s';
+    bmCtxTarget.style.opacity = '0';
+    bmCtxTarget.style.transform = 'scale(0.85)';
+    setTimeout(() => { bmCtxTarget.remove(); bmCtxTarget = null; }, 200);
+    showToast('书签已删除');
+  } catch { showToast('删除失败'); }
+});
+
+document.getElementById('bmModalCancel').addEventListener('click', () => {
+  document.getElementById('bmModalOverlay').style.display = 'none';
+});
+
+document.getElementById('bmModalOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('bmModalOverlay'))
+    document.getElementById('bmModalOverlay').style.display = 'none';
+});
+
+document.getElementById('bmModalSave').addEventListener('click', async () => {
+  if (!bmCtxTarget) return;
+  const id    = bmCtxTarget.dataset.bmId;
+  const title = document.getElementById('bmModalInput').value.trim();
+  if (!id || !title) return;
+  try {
+    await chrome.bookmarks.update(id, { title });
+    bmCtxTarget.querySelector('span').textContent = title;
+    bmCtxTarget.dataset.bmTitle = title;
+    bmCtxTarget.title = title;
+    document.getElementById('bmModalOverlay').style.display = 'none';
+    showToast('书签已更新');
+  } catch { showToast('更新失败'); }
+});
+
+document.getElementById('bmModalInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter')  document.getElementById('bmModalSave').click();
+  if (e.key === 'Escape') document.getElementById('bmModalCancel').click();
+});
 
 
 /* ----------------------------------------------------------------
