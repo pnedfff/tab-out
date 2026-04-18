@@ -1555,6 +1555,7 @@ async function renderBookmarks() {
       const title = bm.title || domain || bm.url;
       const safeUrl = bm.url.replace(/"/g, '&quot;');
       return `<a class="bookmark-chip" href="${safeUrl}" title="${title}" target="_top"
+          draggable="true"
           data-bm-id="${bm.id}" data-bm-title="${title.replace(/"/g, '&quot;')}" data-bm-url="${safeUrl}">
         ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.style.display='none'">` : ''}
         <span>${title}</span>
@@ -1565,6 +1566,69 @@ async function renderBookmarks() {
     strip.style.display = 'none';
   }
 }
+
+
+/* ----------------------------------------------------------------
+   BOOKMARK DRAG-TO-REORDER
+   ---------------------------------------------------------------- */
+
+(function initBookmarkDnd() {
+  const strip = document.getElementById('bookmarksStrip');
+  let dragSrc = null;
+
+  document.addEventListener('dragstart', (e) => {
+    const chip = e.target.closest('.bookmark-chip');
+    if (!chip) return;
+    dragSrc = chip;
+    chip.classList.add('bm-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', chip.dataset.bmId);
+  });
+
+  document.addEventListener('dragend', () => {
+    if (dragSrc) dragSrc.classList.remove('bm-dragging');
+    document.querySelectorAll('.bookmark-chip.bm-drag-over').forEach(c => c.classList.remove('bm-drag-over'));
+    dragSrc = null;
+  });
+
+  document.addEventListener('dragover', (e) => {
+    const chip = e.target.closest('.bookmark-chip');
+    if (!chip || chip === dragSrc) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.bookmark-chip.bm-drag-over').forEach(c => c.classList.remove('bm-drag-over'));
+    chip.classList.add('bm-drag-over');
+  });
+
+  document.addEventListener('drop', async (e) => {
+    const chip = e.target.closest('.bookmark-chip');
+    if (!chip || !dragSrc || chip === dragSrc) return;
+    e.preventDefault();
+
+    // Reorder DOM
+    const chips = [...strip.querySelectorAll('.bookmark-chip')];
+    const srcIdx = chips.indexOf(dragSrc);
+    const dstIdx = chips.indexOf(chip);
+    if (srcIdx === -1 || dstIdx === -1) return;
+
+    if (srcIdx < dstIdx) {
+      chip.after(dragSrc);
+    } else {
+      chip.before(dragSrc);
+    }
+
+    chip.classList.remove('bm-drag-over');
+
+    // Persist to Chrome bookmarks
+    try {
+      const newChips = [...strip.querySelectorAll('.bookmark-chip')];
+      const newIndex = newChips.indexOf(dragSrc);
+      await chrome.bookmarks.move(dragSrc.dataset.bmId, { index: newIndex });
+    } catch (err) {
+      console.warn('[tab-out] Could not reorder bookmark:', err);
+    }
+  });
+})();
 
 
 /* ----------------------------------------------------------------
