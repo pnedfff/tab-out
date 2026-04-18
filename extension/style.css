@@ -58,10 +58,46 @@ body::before {
 header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 48px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--warm-gray);
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px 28px;
+  border-radius: 12px;
+  gap: 32px;
+  transition: background 0.6s ease, border-color 0.6s ease;
+  border: 1px solid transparent;
+}
+
+/* Time-of-day themes */
+header.time-morning {
+  background: linear-gradient(135deg, rgba(251, 188, 5, 0.08), rgba(200, 113, 58, 0.06));
+  border-color: rgba(200, 113, 58, 0.15);
+}
+header.time-morning .header-left h1 { color: #b8621a; }
+header.time-morning .header-left .date { color: #c8813a; }
+
+header.time-afternoon {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.07), rgba(52, 168, 83, 0.05));
+  border-color: rgba(66, 133, 244, 0.15);
+}
+header.time-afternoon .header-left h1 { color: #2a6abf; }
+header.time-afternoon .header-left .date { color: #4a85c8; }
+
+header.time-evening {
+  background: linear-gradient(135deg, rgba(90, 107, 122, 0.1), rgba(130, 80, 160, 0.07));
+  border-color: rgba(90, 107, 122, 0.2);
+}
+header.time-evening .header-left h1 { color: #4a5b72; }
+header.time-evening .header-left .date { color: #7a8fa8; }
+
+header.time-night {
+  background: linear-gradient(135deg, rgba(26, 22, 50, 0.07), rgba(60, 40, 90, 0.05));
+  border-color: rgba(60, 40, 90, 0.12);
+}
+header.time-night .header-left h1 { color: #3a2d5c; }
+header.time-night .header-left .date { color: #7a6a9a; }
+
+.header-left {
+  flex-shrink: 0;
 }
 
 .header-left h1 {
@@ -71,6 +107,7 @@ header {
   letter-spacing: -0.5px;
   color: var(--ink);
   margin-bottom: 4px;
+  transition: color 0.6s ease;
 }
 
 .header-left .date {
@@ -79,6 +116,110 @@ header {
   font-weight: 400;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  transition: color 0.6s ease;
+}
+
+/* ---- Search + Bookmarks ---- */
+.search-form {
+  flex: 1;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--warm-gray);
+  border-radius: 10px;
+  background: var(--card-bg);
+  padding: 0 14px;
+  gap: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input-wrap:focus-within {
+  border-color: rgba(66, 133, 244, 0.4);
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.08);
+}
+
+.google-wordmark {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.search-input {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  flex: 1;
+  padding: 11px 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.search-icon-right {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Bookmarks strip — horizontal, up to 2 rows */
+.bookmarks-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 64px;
+  overflow: hidden;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.bookmark-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--warm-gray);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  text-decoration: none;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.bookmark-chip:hover {
+  border-color: rgba(200, 113, 58, 0.4);
+  background: rgba(200, 113, 58, 0.04);
+  color: var(--ink);
+}
+
+.bookmark-chip img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.bookmark-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ---- Tab cleanup banner ---- */

@@ -496,9 +496,18 @@ function timeAgo(dateStr) {
  */
 function getGreeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
+  if (hour >= 5 && hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 21) return 'Good evening';
+  return 'Good night';
+}
+
+function getTimeTheme() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'time-morning';
+  if (hour < 17) return 'time-afternoon';
+  if (hour < 21) return 'time-evening';
+  return 'time-night';
 }
 
 /**
@@ -1025,6 +1034,11 @@ async function renderStaticDashboard() {
   const dateEl     = document.getElementById('dateDisplay');
   if (greetingEl) greetingEl.textContent = getGreeting();
   if (dateEl)     dateEl.textContent     = getDateDisplay();
+  const headerEl = document.querySelector('header');
+  if (headerEl) {
+    headerEl.classList.remove('time-morning', 'time-afternoon', 'time-evening', 'time-night');
+    headerEl.classList.add(getTimeTheme());
+  }
 
   // --- Fetch tabs ---
   await fetchOpenTabs();
@@ -1477,6 +1491,83 @@ document.addEventListener('input', async (e) => {
 
 
 /* ----------------------------------------------------------------
+   SEARCH + BOOKMARKS
+   ---------------------------------------------------------------- */
+
+document.getElementById('searchForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = document.getElementById('searchInput').value.trim();
+  if (q) window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+});
+
+// Press / to focus search from anywhere
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement !== document.getElementById('searchInput')) {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('searchInput').blur();
+  }
+});
+
+async function renderBookmarks() {
+  const strip = document.getElementById('bookmarksStrip');
+  if (!strip) return;
+
+  if (!chrome.bookmarks) {
+    strip.style.display = 'none';
+    return;
+  }
+
+  try {
+    const tree = await chrome.bookmarks.getTree();
+    const bookmarks = [];
+
+    function collect(nodes) {
+      for (const node of nodes) {
+        if (node.url) {
+          bookmarks.push(node);
+        } else if (node.children) {
+          collect(node.children);
+        }
+      }
+    }
+
+    const root = tree[0];
+    // Collect from Bookmarks Bar first, then Other Bookmarks as fallback
+    const bar = root.children?.find(n => n.id === '1');
+    if (bar) collect(bar.children || []);
+    if (bookmarks.length === 0) {
+      const other = root.children?.find(n => n.id === '2');
+      if (other) collect(other.children || []);
+    }
+
+    if (bookmarks.length === 0) {
+      strip.style.display = 'none';
+      return;
+    }
+
+    strip.innerHTML = bookmarks.map(bm => {
+      let domain = '';
+      try { domain = new URL(bm.url).hostname; } catch {}
+      const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
+      const title = bm.title || domain || bm.url;
+      const safeUrl = bm.url.replace(/"/g, '&quot;');
+      return `<a class="bookmark-chip" href="${safeUrl}" title="${title}" target="_top">
+        ${faviconUrl ? `<img src="${faviconUrl}" alt="" onerror="this.style.display='none'">` : ''}
+        <span>${title}</span>
+      </a>`;
+    }).join('');
+  } catch (err) {
+    console.warn('[tab-out] Could not load bookmarks:', err);
+    strip.style.display = 'none';
+  }
+}
+
+
+/* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
+renderBookmarks();
 renderDashboard();
