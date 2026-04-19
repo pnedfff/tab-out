@@ -89,3 +89,30 @@ MIT
 ---
 
 Built by [Zara](https://x.com/zarazhangrui)
+
+---
+
+## 修改摘要（Kevin Fork）
+
+本 Fork 在原版基础上新增以下功能：
+
+### 🔍 Google 搜索框
+- Header 右侧嵌入搜索框，与问候语同行
+- 框内显示彩色 **Google** 字样（蓝红黄绿）
+- 按 `/` 快速聚焦，回车跳转搜索，`Esc` 取消
+
+### 🕐 时间感知问候语主题
+根据当前时段自动切换 Header 背景和文字颜色：
+
+| 时段 | 问候 | 主题色 |
+|------|------|--------|
+| 05–12 | Good morning | 琥珀橙，暖金渐变 |
+| 12–17 | Good afternoon | 谷歌蓝，蓝绿渐变 |
+| 17–21 | Good evening | 石板蓝，蓝紫渐变 |
+| 21–05 | Good night | 深紫，暗紫渐变 |
+
+### 🔖 Chrome 书签栏横向列表
+- Header 下方展示 Chrome 书签栏书签，最多显示 2 行
+- 每个书签显示 favicon + 名称
+- **右键菜单**：编辑名称 / 删除书签
+- **拖拽排序**：直接拖动 chip 调整顺序，实时同步到 Chrome 书签
