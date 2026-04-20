@@ -43,15 +43,14 @@ body::before {
 .container {
   position: relative;
   z-index: 1;
-  max-width: 960px;
+  width: min(94vw, 1800px);
   margin: 0 auto;
-  padding: 48px 32px 80px;
+  padding: clamp(28px, 4vh, 56px) clamp(20px, 3vw, 48px) clamp(48px, 6vh, 96px);
 }
 
-/* When the saved-for-later sidebar is open, expand the container
-   so the tab grid still has room for 2-3 columns */
+/* When the saved-for-later sidebar is open, same fluid rule applies */
 .container:has(.dashboard-columns) {
-  max-width: 1300px;
+  width: min(96vw, 2000px);
 }
 
 /* ---- Header ---- */
@@ -103,7 +102,7 @@ header.time-night .header-left .date { color: #7a6a9a; }
 .header-left h1 {
   font-family: 'Newsreader', serif;
   font-weight: 300;
-  font-size: 28px;
+  font-size: clamp(22px, 2.2vw, 36px);
   letter-spacing: -0.5px;
   color: var(--ink);
   margin-bottom: 4px;
@@ -370,8 +369,8 @@ header.time-night .header-left .date { color: #7a6a9a; }
 
 /* ---- Mission Cards ---- */
 .missions {
-  columns: 280px;
-  column-gap: 12px;
+  columns: clamp(260px, 22vw, 360px);
+  column-gap: clamp(10px, 1vw, 16px);
   margin-bottom: 40px;
 }
 
