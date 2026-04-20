@@ -1644,10 +1644,13 @@ document.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   bmCtxTarget = chip;
   bmCtxMenu.style.display = 'block';
-  const x = Math.min(e.clientX, window.innerWidth - 160);
-  const y = Math.min(e.clientY, window.innerHeight - 90);
-  bmCtxMenu.style.left = x + 'px';
-  bmCtxMenu.style.top  = y + 'px';
+  // clientX/Y are viewport pixels; divide by scale to get body-space coordinates
+  const bx = e.clientX / currentScale;
+  const by = e.clientY / currentScale;
+  const maxX = window.innerWidth  / currentScale - 160;
+  const maxY = window.innerHeight / currentScale - 90;
+  bmCtxMenu.style.left = Math.min(bx, maxX) + 'px';
+  bmCtxMenu.style.top  = Math.min(by, maxY) + 'px';
 });
 
 document.addEventListener('click', (e) => {
@@ -1718,15 +1721,16 @@ document.getElementById('bmModalInput').addEventListener('keydown', (e) => {
    Base design width: 1280px.
    ---------------------------------------------------------------- */
 
+let currentScale = 1;
+
 function applyViewportZoom() {
   const DESIGN_WIDTH = 1280;
-  const scale = Math.max(0.6, Math.min(window.innerWidth / DESIGN_WIDTH, 3.0));
+  currentScale = Math.max(0.6, Math.min(window.innerWidth / DESIGN_WIDTH, 3.0));
   const body = document.body;
-  body.style.transform = `scale(${scale.toFixed(5)})`;
+  body.style.transform = `scale(${currentScale.toFixed(5)})`;
   body.style.transformOrigin = '0 0';
-  // Compensate layout size so scrollbars / body fill viewport correctly
-  body.style.width  = `${(window.innerWidth  / scale).toFixed(2)}px`;
-  body.style.minHeight = `${(window.innerHeight / scale).toFixed(2)}px`;
+  body.style.width  = `${(window.innerWidth  / currentScale).toFixed(2)}px`;
+  body.style.minHeight = `${(window.innerHeight / currentScale).toFixed(2)}px`;
 }
 
 window.addEventListener('resize', applyViewportZoom);
