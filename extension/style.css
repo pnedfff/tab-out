@@ -414,6 +414,22 @@ header.time-night .header-left .date { color: #7a6a9a; }
   transform: translateY(-1px);
 }
 
+/* Drag-to-reorder states */
+.mission-card.card-dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+}
+
+.mission-card.card-drag-before {
+  border-top: 2px solid #4285F4;
+  margin-top: -1px;
+}
+
+.mission-card.card-drag-after {
+  border-bottom: 2px solid #4285F4;
+  margin-bottom: -1px;
+}
+
 /* Closing animation — card scales down and fades out */
 .mission-card.closing {
   opacity: 0;

@@ -887,7 +887,7 @@ function renderDomainCard(group) {
   }
 
   return `
-    <div class="mission-card domain-card ${hasDupes ? 'has-amber-bar' : 'has-neutral-bar'}" data-domain-id="${stableId}">
+    <div class="mission-card domain-card ${hasDupes ? 'has-amber-bar' : 'has-neutral-bar'}" data-domain-id="${stableId}" draggable="true">
       <div class="status-bar"></div>
       <div class="mission-content">
         <div class="mission-top">
@@ -1627,6 +1627,65 @@ async function renderBookmarks() {
     } catch (err) {
       console.warn('[tab-out] Could not reorder bookmark:', err);
     }
+  });
+})();
+
+
+/* ----------------------------------------------------------------
+   CARD DRAG-TO-REORDER
+   ---------------------------------------------------------------- */
+
+(function initCardDnd() {
+  let dragSrc = null;
+
+  document.addEventListener('dragstart', (e) => {
+    const card = e.target.closest('.mission-card');
+    if (!card) return;
+    dragSrc = card;
+    card.classList.add('card-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  document.addEventListener('dragend', () => {
+    if (dragSrc) dragSrc.classList.remove('card-dragging');
+    document.querySelectorAll('.mission-card.card-drag-before, .mission-card.card-drag-after')
+      .forEach(c => c.classList.remove('card-drag-before', 'card-drag-after'));
+    dragSrc = null;
+  });
+
+  document.addEventListener('dragover', (e) => {
+    const card = e.target.closest('.mission-card');
+    if (!card || card === dragSrc) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.mission-card.card-drag-before, .mission-card.card-drag-after')
+      .forEach(c => c.classList.remove('card-drag-before', 'card-drag-after'));
+    // Top-half → insert before, bottom-half → insert after
+    const rect = card.getBoundingClientRect();
+    card.classList.add(e.clientY < rect.top + rect.height / 2 ? 'card-drag-before' : 'card-drag-after');
+  });
+
+  document.addEventListener('drop', (e) => {
+    const card = e.target.closest('.mission-card');
+    if (!card || !dragSrc || card === dragSrc) return;
+    e.preventDefault();
+
+    const missions = document.getElementById('openTabsMissions');
+    if (!missions) return;
+    const cards = [...missions.querySelectorAll('.mission-card')];
+    const srcIdx = cards.indexOf(dragSrc);
+    const dstIdx = cards.indexOf(card);
+    if (srcIdx === -1 || dstIdx === -1) return;
+
+    const insertBefore = card.classList.contains('card-drag-before');
+    insertBefore ? card.before(dragSrc) : card.after(dragSrc);
+
+    // Keep domainGroups in sync
+    const [removed] = domainGroups.splice(srcIdx, 1);
+    const newDst = insertBefore ? dstIdx : dstIdx + (srcIdx < dstIdx ? 0 : 1);
+    domainGroups.splice(Math.max(0, newDst > srcIdx ? newDst - 1 : newDst), 0, removed);
+
+    card.classList.remove('card-drag-before', 'card-drag-after');
   });
 })();
 
