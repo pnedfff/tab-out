@@ -28,6 +28,10 @@ body {
   color: var(--ink);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  will-change: transform;
+  transform-origin: 0 0;
+  overflow-x: hidden;
 }
 
 /* Subtle paper texture */
