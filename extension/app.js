@@ -1713,6 +1713,22 @@ document.getElementById('bmModalInput').addEventListener('keydown', (e) => {
 
 
 /* ----------------------------------------------------------------
+   VIEWPORT ZOOM — scales everything proportionally
+   Base design width: 1280px (looks "normal" at 1280px viewport)
+   At 1920px → zoom 1.5x，At 2560px → zoom 2x，At 800px → zoom 0.62x
+   ---------------------------------------------------------------- */
+
+function applyViewportZoom() {
+  const DESIGN_WIDTH = 1280;
+  const zoom = Math.max(0.6, Math.min(window.innerWidth / DESIGN_WIDTH, 3.0));
+  document.documentElement.style.zoom = zoom.toFixed(4);
+}
+
+window.addEventListener('resize', applyViewportZoom);
+applyViewportZoom();
+
+
+/* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
 renderBookmarks();
