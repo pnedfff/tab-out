@@ -22,6 +22,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  background: var(--paper); /* show paper color in the margin gap around scaled body */
+}
+
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--paper);
