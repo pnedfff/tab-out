@@ -1786,7 +1786,7 @@ function applyViewportZoom() {
   const DESIGN_WIDTH = 1280;
   const H_MARGIN = 24; // left & right breathing room (px)
   const V_MARGIN = 20; // top & bottom breathing room (px)
-  currentScale = Math.max(0.6, Math.min((window.innerWidth - H_MARGIN * 2) / DESIGN_WIDTH, 1.0));
+  currentScale = Math.max(0.6, Math.min((window.innerWidth - H_MARGIN * 2) / DESIGN_WIDTH, 2.0));
   const body = document.body;
   body.style.transform = `translate(${H_MARGIN}px, ${V_MARGIN}px) scale(${currentScale.toFixed(5)})`;
   body.style.transformOrigin = '0 0';
